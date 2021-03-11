@@ -18,6 +18,7 @@ ff_dim = 32  # Hidden layer size in feedforward network.
 num_experts = 10  # Number of experts used in the Switch Transformer.
 batch_size = 50  # Batch size.
 learning_rate = 0.001  # Learning rate.
+
 dropout_rate = 0.25  # Dropout rate.
 num_epochs = 3  # Number of epochs.
 num_tokens_per_batch = (
