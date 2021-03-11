@@ -1,0 +1,5 @@
+500/500 [==============================] - 1215s 2s/step - loss: 1.5218 - accuracy: 0.7184 - val_loss: 1.3277 - val_accuracy: 0.8554
+Epoch 2/3
+500/500 [==============================] - 1213s 2s/step - loss: 1.2090 - accuracy: 0.9202 - val_loss: 1.3543 - val_accuracy: 0.8563
+Epoch 3/3
+500/500 [==============================] - 1159s 2s/step - loss: 1.1221 - accuracy: 0.9582 - val_loss: 1.3554 - val_accuracy: 0.8609
