@@ -1,16 +1,28 @@
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
+import numpy as np
+from sklearn.model_selection import train_test_split
 
-vocab_size = 20000  # Only consider the top 20k words
+vocab_size = 3  # 20000  # Only consider the top 20k words
 num_tokens_per_example = 200  # Only consider the first 200 words of each movie review
-(x_train, y_train), (x_val, y_val) = keras.datasets.imdb.load_data(num_words=vocab_size)
+# (x_train, y_train), (x_val, y_val) = keras.datasets.imdb.load_data(num_words=vocab_size)
+
+# ==================================================
+ds_data = np.load('dataset/data.npy', allow_pickle=True)  # ).astype(np.float)
+ds_labels = np.load('dataset/labels.npy', allow_pickle=True)  # ).astype(np.float)
+print(ds_data.shape)
+print(ds_labels.shape)
+x_train, y_train, x_val, y_val = train_test_split(ds_data, ds_labels, train_size=0.75)
+# ==================================================
+
 print(len(x_train), "Training sequences")
 print(len(x_val), "Validation sequences")
-x_train = keras.preprocessing.sequence.pad_sequences(
-    x_train, maxlen=num_tokens_per_example
-)
-x_val = keras.preprocessing.sequence.pad_sequences(x_val, maxlen=num_tokens_per_example)
+print(x_train.shape)
+# x_train = keras.preprocessing.sequence.pad_sequences(
+#     x_train, maxlen=num_tokens_per_example
+# )
+# x_val = keras.preprocessing.sequence.pad_sequences(x_val, maxlen=num_tokens_per_example)
 
 embed_dim = 32  # Embedding size for each token.
 num_heads = 2  # Number of attention heads
@@ -219,8 +231,14 @@ def run_experiment(classifier):
         epochs=num_epochs,
         validation_data=(x_val, y_val),
     )
-    return history
 
+    score = classifier.evaluate(x_val, y_val, verbose=0)
+    print("Test loss:", score[0])
+    print("Test accuracy:", score[1])
+
+    return history
 
 classifier = create_classifier()
 run_experiment(classifier)
+
+classifier.save(filepath='model')
