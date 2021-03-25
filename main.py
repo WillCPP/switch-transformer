@@ -13,7 +13,7 @@ ds_data = np.load('dataset/data.npy', allow_pickle=True)  # ).astype(np.float)
 ds_labels = np.load('dataset/labels.npy', allow_pickle=True)  # ).astype(np.float)
 print(ds_data.shape)
 print(ds_labels.shape)
-x_train, y_train, x_val, y_val = train_test_split(ds_data, ds_labels, train_size=0.75)
+x_train, x_val, y_train, y_val = train_test_split(ds_data, ds_labels, train_size=0.75)
 # ==================================================
 
 print(len(x_train), "Training sequences")
