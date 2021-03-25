@@ -3,17 +3,26 @@ from tensorflow import keras
 from tensorflow.keras import layers
 import numpy as np
 from sklearn.model_selection import train_test_split
+from tensorflow.keras.layers import Conv1D, GlobalMaxPooling1D, Dense, Dropout, Flatten
+from tensorflow.keras.models import Sequential
 
 vocab_size = 3  # 20000  # Only consider the top 20k words
 num_tokens_per_example = 200  # Only consider the first 200 words of each movie review
 # (x_train, y_train), (x_val, y_val) = keras.datasets.imdb.load_data(num_words=vocab_size)
 
 # ==================================================
-ds_data = np.load('dataset/data.npy', allow_pickle=True)  # ).astype(np.float)
-ds_labels = np.load('dataset/labels.npy', allow_pickle=True)  # ).astype(np.float)
+ds_data = np.load('dataset_2/data.npy', allow_pickle=True)  # ).astype(np.float)
+ds_labels = np.load('dataset_2/labels.npy', allow_pickle=True)  # ).astype(np.float)
 print(ds_data.shape)
 print(ds_labels.shape)
 x_train, x_val, y_train, y_val = train_test_split(ds_data, ds_labels, train_size=0.75)
+
+# x_train, x_val, y_train, y_val = train_test_split(ds_data, ds_labels, train_size=0.5)
+# x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, train_size=0.5)
+# x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, train_size=0.5)
+# x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, train_size=0.5)
+x_train = x_train.reshape(x_train.shape[0], x_train.shape[1], 1)
+x_val = x_val.reshape(x_val.shape[0], x_val.shape[1], 1)
 # ==================================================
 
 print(len(x_train), "Training sequences")
@@ -238,7 +247,75 @@ def run_experiment(classifier):
 
     return history
 
-classifier = create_classifier()
-run_experiment(classifier)
+# Regular DNN ==================================================
+class DNN():
+    def __init__(self, input_shape, num_classes):
+        self.model = None
+        self.input_shape = input_shape
+        self.num_classes = num_classes
 
-classifier.save(filepath='model')
+    def createModel(self):
+        layers = [
+            # keras.Input(shape=self.input_shape, dtype='float64'),
+            Conv1D(32, (200), input_shape=(200,1), activation="relu"),
+            Conv1D(32, 1, activation="relu"),
+            GlobalMaxPooling1D(),
+            Dense(32, activation="relu"),
+            # Dropout(0.5),
+            Dense(1, activation="sigmoid", name="predictions"),
+
+            # Conv2D(32, kernel_size=(3, 3), activation="relu"),
+            # MaxPooling2D(pool_size=(2, 2)),
+            # Conv2D(64, kernel_size=(3, 3), activation="relu"),
+            # MaxPooling2D(pool_size=(2, 2)),
+            # Conv2D(128, kernel_size=(3, 3), activation="relu"),
+            # MaxPooling2D(pool_size=(2, 2)),
+            # Flatten(),
+            # Dropout(0.5),
+            # Dense(self.num_classes, activation="softmax"),
+        ]
+        model = Sequential(layers)
+        model.summary()
+
+        # loss = loss=keras.losses.CategoricalCrossentropy(from_logits=True)
+
+        # model.compile(optimizer=keras.optimizers.Adam(), loss=loss, metrics=[keras.metrics.CategoricalAccuracy()])
+        model.compile(loss="binary_crossentropy", optimizer=keras.optimizers.Adam(0.01), metrics=["accuracy"])
+        self.model = model
+
+    def train(self, x_train, y_train):
+        if self.model is None:
+            print('Model has not been created yet, run createModel() first.')
+            return
+        else:
+            # optimizer = keras.optimizers.Adam(0.001)
+
+            # self.model.compile(optimizer=optimizer,
+            #     loss=keras.losses.CategoricalCrossentropy(),
+            #     metrics=[keras.metrics.CategoricalAccuracy()])
+
+            # self.model.fit(x_train, y_train, batch_size=self.params['batch_size'], epochs=self.params['epochs'], validation_split=self.params['validation_split'])
+            self.model.fit(x_train, y_train, epochs=num_epochs, validation_split=0.1)
+    
+    def saveModel(self, path):
+        self.model.save(path)
+
+    def loadModel(self, path):
+        self.model = keras.models.load_model(path)
+
+def run_experiment_2():
+    dnn = DNN((200,),2,)
+    dnn.createModel()
+    dnn.train(x_train, y_train)
+    dnn.saveModel()
+    score = dnn.model.evaluate(x_val, y_val, verbose=0)
+    print("Test loss:", score[0])
+    print("Test accuracy:", score[1])
+# ==================================================
+
+# classifier = create_classifier()
+# run_experiment(classifier)
+
+run_experiment_2()
+
+# classifier.save(filepath='model')
